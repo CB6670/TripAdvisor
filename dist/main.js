@@ -136,6 +136,42 @@ return mapboxgl;
 
 /***/ }),
 
+/***/ "./src/apiCalls.js":
+/*!*************************!*\
+  !*** ./src/apiCalls.js ***!
+  \*************************/
+/*! exports provided: default, getAllData */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "getAllData", function() { return getAllData; });
+async function getData(category, id = 0){
+  let endpoint =`https://trip-planner-fsa.herokuapp.com/api/${category}`;
+  if (id) {
+    endpoint += `/${id}`;
+  }
+  const response = await fetch(endpoint);
+  const data = await response.json();
+  return data;//async returns promise
+}
+
+async function getAllData(){
+  let categories = ['hotels', 'activities', 'restaurants'];
+  const endpoints = categories.map(category =>
+    `https://trip-planner-fsa.herokuapp.com/api/${category}`);
+  
+  const responsePromises = endpoints.map(endpoint => fetch(endpoint));
+  const responsesArr = await Promise.all(responsePromises)
+  const dataArr = responsesArr.map(async prom => await prom.json())
+  return dataArr;//returns promise with array of data objects
+}
+
+/* harmony default export */ __webpack_exports__["default"] = (getData);
+
+
+/***/ }),
+
 /***/ "./src/index.js":
 /*!**********************!*\
   !*** ./src/index.js ***!
@@ -148,7 +184,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var mapbox_gl__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! mapbox-gl */ "./node_modules/mapbox-gl/dist/mapbox-gl.js");
 /* harmony import */ var mapbox_gl__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(mapbox_gl__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _marker_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./marker.js */ "./src/marker.js");
+/* harmony import */ var _apiCalls_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./apiCalls.js */ "./src/apiCalls.js");
 console.log('Hello from JavaScript');
+
+
 
 
 mapbox_gl__WEBPACK_IMPORTED_MODULE_0___default.a.accessToken = 'pk.eyJ1IjoiY29ubmVyc3Rlbm5ldHQiLCJhIjoiY2p2dHJ2cjdtMHNpYjQ0b2dtcDVsajl1dCJ9.-3X1emS1Fdef9FM6JJtTIw';
@@ -159,13 +198,20 @@ const map = new mapbox_gl__WEBPACK_IMPORTED_MODULE_0___default.a.Map({
   zoom: 12, // starting zoom
   style: 'mapbox://styles/mapbox/streets-v10' // mapbox has lots of different map styles available.
 });
-const newDiv = document.createElement("div");
-newDiv.style.width = '32px';
-newDiv.style.height = '39px';
-newDiv.style.backgroundImage = 'url(http://i.imgur.com/WbMOfMl.png)';
-const newMarker = new mapbox_gl__WEBPACK_IMPORTED_MODULE_0___default.a.Marker(newDiv).setLngLat([-74.009151, 40.705086]).addTo(map);
+// const newDiv = document.createElement("div");
+// newDiv.style.width = '32px';
+// newDiv.style.height = '39px';
+// newDiv.style.backgroundImage = 'url(http://i.imgur.com/WbMOfMl.png)';
+// const newMarker = new mapboxgl.Marker(newDiv).setLngLat([-74.009151, 40.705086]).addTo(map);
 
-Object(_marker_js__WEBPACK_IMPORTED_MODULE_1__["default"])("hotel",[-74.005, 40.701]).addTo(map);
+// markerCreator("hotels",[-74.005, 40.701]).addTo(map);
+// [{category:, name:, place:{location:}}]
+async function logs() {
+  console.log(await Object(_apiCalls_js__WEBPACK_IMPORTED_MODULE_2__["getAllData"])());
+}
+
+logs();
+
 
 /***/ }),
 
@@ -182,19 +228,19 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var mapbox_gl__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(mapbox_gl__WEBPACK_IMPORTED_MODULE_0__);
 
 function markerCreator(category,coordsArr){
-let link ="http://i.imgur.com/WbMOfMl.png";
-    switch(category){
-        case "hotel": 
+let link;
+switch(category){
+    case "hotels": 
         link = "http://i.imgur.com/D9574Cu.png";
         break;
-        case "activities":
-        link="http://i.imgur.com/WbMOfMl.png";
+    case "activities":
+        link = "http://i.imgur.com/WbMOfMl.png";
         break;
-        case "restaurants":
-        link="http://i.imgur.com/cqR6pUI.png";
+    case "restaurants":
+        link = "http://i.imgur.com/cqR6pUI.png";
         break;
-    }
-    let newDiv = document.createElement("div");
+}
+let newDiv = document.createElement("div");
 newDiv.style.width = '32px';
 newDiv.style.height = '39px';
 newDiv.style.backgroundImage = `url(${link})`;
